@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ZENNY'S TRAP</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Roboto:wght@700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      color: #ff0000;
+      font-family: 'Roboto', sans-serif;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+
+    /* RED GLOWING CIRCLES */
+    .circle {
+      position: absolute;
+      top: -30px;
+      width: 12px;
+      height: 12px;
+      background: #ff0000;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 15px #ff0000,
+        0 0 30px #ff1a1a,
+        0 0 50px #ff3333,
+        0 0 70px #ff0000;
+      animation: fall linear infinite;
+      opacity: 0.9;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(110vh) scale(0.5);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      width: 90%;
+      max-width: 400px;
+      z-index: 10;
+    }
+
+    .box {
+      background: rgba(15, 0, 0, 0.97);
+      border: 4px solid #ff0000;
+      border-radius: 22px;
+      padding: 35px 20px;
+      box-shadow: 
+        0 0 40px #ff0000,
+        0 0 80px #ff1a1a,
+        inset 0 0 20px rgba(255,0,0,0.3);
+      animation: drop 1.5s ease-out forwards;
+      opacity: 0;
+      transform: translateY(-100px);
+    }
+
+    @keyframes drop {
+      0% { opacity: 0; transform: translateY(-100px); }
+      70% { opacity: 1; transform: translateY(25px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.4rem;
+      color: #ff0000;
+      text-shadow: 
+        0 0 15px #ff0000,
+        0 0 30px #ff1a1a,
+        0 0 50px #ff3333;
+      margin-bottom: 20px;
+      animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 15px #ff0000; }
+      to { text-shadow: 0 0 25px #ff0000, 0 0 50px #ff1a1a, 0 0 70px #ff3333; }
+    }
+
+    .btn {
+      background: #ff0000;
+      color: #000;
+      font-weight: bold;
+      font-size: 1.4rem;
+      padding: 16px 32px;
+      border: 3px solid #ff3333;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 25px 0;
+      box-shadow: 0 0 25px #ff0000;
+      transition: all 0.3s;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .btn:hover {
+      background: #fff;
+      color: #000;
+      transform: scale(1.15);
+      box-shadow: 0 0 40px #fff, 0 0 60px #ff0000;
+    }
+
+    .result {
+      margin-top: 25px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 0 15px #ff0000;
+      opacity: 0;
+      transition: opacity 1s;
+    }
+
+    .by {
+      margin-top: 30px;
+      font-size: 1.7rem;
+      color: #ff0000;
+      font-family: 'Orbitron', sans-serif;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- RED CIRCLES -->
+  <div id="circles"></div>
+
+  <div class="container">
+    <div class="box">
+      <h1>ZENNY'S TRAP</h1>
+      <p id="step1">CLICK ME TO REVEAL A SURPRISE</p>
+      <button class="btn" onclick="reveal()">CLICK ME</button>
+
+      <div id="result" class="result hidden">
+        This is ur ip adress<span style="font-size:2.2rem">😭</span><br>
+        <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
+      </div>
+
+      <div class="by">BY ZENNY!</div>
+    </div>
+  </div>
+
+  <script>
+    // === RED GLOWING CIRCLES ===
+    const container = document.getElementById('circles');
+
+    function createCircle() {
+      const circle = document.createElement('div');
+      circle.classList.add('circle');
+      circle.style.left = Math.random() * 100 + 'vw';
+      circle.style.animationDuration = Math.random() * 5 + 5 + 's';
+      circle.style.width = circle.style.height = Math.random() * 15 + 8 + 'px';
+      container.appendChild(circle);
+      setTimeout(() => circle.remove(), 12000);
+    }
+
+    setInterval(createCircle, 150);
+
+    // === IP GRAB & GRABIFY LOG ===
+    let userIP = "Unknown";
+
+    function getIP() {
+      fetch('https://api.ipify.org?format=json')
+        .then(r => r.json())
+        .then(data => {
+          userIP = data.ip;
+          document.getElementById('ip').innerHTML = userIP;
+        })
+        .catch(() => {
+          userIP = "BLOCKED";
+          document.getElementById('ip').innerHTML = userIP;
+        });
+    }
+
+    function reveal() {
+      // === SEND TO GRABIFY ===
+      const img = document.createElement('img');
+      img.src = 'https://grabify.link/BZC9L9?' + Date.now();
+      img.width = 1;
+      img.height = 1;
+      img.style.display = 'none';
+      document.body.appendChild(img);
+
+      // Show result
+      document.getElementById('step1').classList.add('hidden');
+      document.querySelector('.btn').classList.add('hidden');
+      const result = document.getElementById('result');
+      result.classList.remove('hidden');
+      setTimeout(() => result.style.opacity = 1, 100);
+
+      getIP();
+    }
+  </script>
+
+</body>
+</html>
